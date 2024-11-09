@@ -1,3 +1,8 @@
+
+CREATE DATABASE BancoDeDados;
+
+use BancoDeDados;
+
 CREATE TABLE IF NOT EXISTS 
 EQUIPAMENTOS (
     equipamento_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
@@ -6,15 +11,6 @@ EQUIPAMENTOS (
     potencia DECIMAL(6, 2) NOT NULL,  
     eh_input_do_usuario BOOL, 
     rigidez_de_horario TINYINT
-);
-
-CREATE TABLE IF NOT EXISTS 
-HORARIOS_DE_USO (
-    horario_de_uso_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
-    inicio TIME, 
-    fim TIME, 
-    equipamento_id BIGINT UNSIGNED NOT NULL, 
-    FOREIGN KEY (equipamento_id) REFERENCES EQUIPAMENTOS(equipamento_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS
@@ -33,6 +29,17 @@ EQUIPAMENTO_USUARIO (
     FOREIGN KEY (equipamento_id) REFERENCES EQUIPAMENTOS(equipamento_id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES USUARIOS(usuario_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS 
+HORARIOS_DE_USO (
+    horario_de_uso_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    inicio TIME, 
+    fim TIME, 
+    equipamento_usuario_id BIGINT UNSIGNED NOT NULL, 
+    FOREIGN KEY (equipamento_usuario_id) REFERENCES EQUIPAMENTO_USUARIO(equipamento_usuario_id) ON DELETE CASCADE
+);
+
+
 
 DELIMITER //
 
@@ -61,14 +68,25 @@ END //
 CREATE PROCEDURE AddHorarioDeUso(
     IN p_inicio TIME,
     IN p_fim TIME,
-    IN p_equipamento_id BIGINT UNSIGNED
+    IN p_equipamento_usuario_id BIGINT UNSIGNED
 )
 BEGIN
-    INSERT INTO HORARIOS_DE_USO (inicio, fim, equipamento_id)
-    VALUES (p_inicio, p_fim, p_equipamento_id);
+    INSERT INTO HORARIOS_DE_USO (inicio, fim, equipamento_usuario_id)
+    VALUES (p_inicio, p_fim, p_equipamento_usuario_id);
+END //
+
+CREATE PROCEDURE AddEquipamentoUsuario(
+    IN p_equipamento_id BIGINT UNSIGNED,
+    IN p_usuario_id BIGINT UNSIGNED
+)
+BEGIN
+    INSERT INTO EQUIPAMENTO_USUARIO (equipamento_id, usuario_id)
+    VALUES (p_equipamento_id, p_usuario_id);
 END //
 
 DELIMITER ;
+
+
 
 DELIMITER //
 
@@ -93,4 +111,35 @@ BEGIN
     DELETE FROM HORARIOS_DE_USO WHERE horario_de_uso_id = p_horario_de_uso_id;
 END //
 
+CREATE PROCEDURE RemoveEquipamentoUsuario(
+    IN p_equipamento_usuario_id BIGINT UNSIGNED
+)
+BEGIN
+    DELETE FROM EQUIPAMENTO_USUARIO WHERE equipamento_usuario_id = p_equipamento_usuario_id;
+END //
+
 DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE LoginUsuario(
+    IN p_nome VARCHAR(255),
+    IN p_senha VARCHAR(255),
+    OUT p_result INT
+)
+BEGIN
+    DECLARE usuario_count INT;
+
+    SELECT COUNT(*)
+    INTO usuario_count
+    FROM USUARIOS
+    WHERE nome = p_nome AND senha = p_senha;
+
+    IF usuario_count = 1 THEN
+        SET p_result = 1;
+    ELSE
+        SET p_result = 0;
+    END IF;
+END //
+
+DELIMITER ; 

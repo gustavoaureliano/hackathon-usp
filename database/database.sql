@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS 
+EQUIPAMENTOS (
+    equipamento_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    nome_equipamento VARCHAR(255) NOT NULL, 
+    nome_fabricante VARCHAR(255),
+    potencia DECIMAL(6, 2) NOT NULL,  
+    eh_input_do_usuario BOOL, 
+    rigidez_de_horario TINYINT
+);
+
+CREATE TABLE IF NOT EXISTS 
+HORARIOS_DE_USO (
+    horario_de_uso_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    inicio TIME, 
+    fim TIME, 
+    equipamento_id BIGINT UNSIGNED NOT NULL, 
+    FOREIGN KEY (equipamento_id) REFERENCES EQUIPAMENTOS(equipamento_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS
+USUARIOS (
+    usuario_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    nome VARCHAR(255) NOT NULL, 
+    email VARCHAR(255) NOT NULL, 
+    senha VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS 
+EQUIPAMENTO_USUARIO (
+    equipamento_usuario_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    equipamento_id BIGINT UNSIGNED NOT NULL, 
+    usuario_id BIGINT UNSIGNED NOT NULL, 
+    FOREIGN KEY (equipamento_id) REFERENCES EQUIPAMENTOS(equipamento_id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES USUARIOS(usuario_id) ON DELETE CASCADE
+);

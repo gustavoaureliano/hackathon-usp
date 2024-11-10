@@ -150,7 +150,7 @@ def post_output():
     for dado in dados:
         dict = {
             "equipamento":dado[1],
-            "potencia":float(dado[3]),
+            "potencia":float(dado[3])/1000.0,
             "comeco":dado[4],
             "fim":dado[5]
         }

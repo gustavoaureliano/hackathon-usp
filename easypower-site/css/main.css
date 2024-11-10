@@ -1,0 +1,31 @@
+.container {
+	display: flex;
+	max-width: 1200px;
+	width: 90%;
+	background: white;
+	box-sizing: border-box;
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.308);
+	padding: 25px;
+	margin: 20px auto;
+	border-radius: 20px;
+	flex-direction: column
+}
+
+#buttons {
+	display: flex;
+	flex-direction: column;
+}
+
+a.btn-round-small {
+	text-decoration: none;
+	background-color: #cedbe7;
+	box-sizing: border-box;
+	width: 300px;
+	padding: 5px;
+	margin: 10px auto;
+	border: none;
+	align-text: center;
+	border-radius: 30px;
+	color: black;
+	text-align: center
+}

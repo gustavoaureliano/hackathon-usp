@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Easy Power</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+        <link rel="stylesheet" href="./css/addEquipamentos.css"/>
+	</head>
+	<body>
+		<div class="container-flex">
+			<div class="container">
+				<h1>Adicionar equipamento</h1>
+				<input type="text" id="nome" placeholder="Nome" name="fname">
+				<input type="text" id="fabricante" placeholder="fabricante" name="lname">
+				<input type="text" id="potencia" placeholder="potencia (W)" name="lname">
+				<hr>
+				<div class="periodos-add">
+					<h2>Adicionar periodos de uso</h2>
+					<div class="input-period">
+						<input type="text" id="inicio" placeholder="inicio" name="lname">
+						<input type="text" id="fim" placeholder="fim" name="lname">
+					</div>
+				</div>
+				<button class="btn-round-small" id="btnAddPeriodos"> addPeriodoUso</button>
+				<div class="periodos">
+				</div>
+			</div>
+			<button class="btn-round" id="btnAddEquip"> addEquipamentos</button>
+		</div>
+		<script src="./scripts/addEquipamentos.js"></script>
+	</body>
+</html>
+

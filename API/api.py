@@ -8,9 +8,9 @@ app.config["DEBUG"] = True
 
 config = {
     'host': '127.0.0.1',
-    'user': 'app_user',
-    'password': 'Password123!',
-    'database': 'todo'
+    'user': 'leodiasdc',
+    'password': 'senha123',
+    'database': 'database_0'
 }
 
 def db_connection():
@@ -33,6 +33,24 @@ def add_equipamento():
     cur.close()
     conn.close()
     return jsonify({"success": True})
+
+
+@app.route('/api/add_equipamento_usuario', methods=['POST'])
+def add_equipamento_usuario():
+    data = request.get_json()
+    equipamento_id = data.get('equipamento_id')
+    usuario_id = data.get('usuario_id')
+    
+    # Conectar ao banco e chamar a procedure
+    conn = db_connection()
+
+    cursor = conn.cursor()
+    cursor.callproc('AddEquipamentoUsuario', [equipamento_id, usuario_id])
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': 'Equipamento adicionado ao usuário com sucesso'}), 200
 
 @app.route('/api/usuario', methods=['POST'])
 def add_usuario():
@@ -100,7 +118,7 @@ def remove_horario_de_uso():
 UPLOAD_FOLDER = '/api/output'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/api/output', methods = 'POST')
+@app.route('/api/output', methods = ['POST'])
 def post_output():
     imagem_equipamento = request.files['imagem_equipamento']
     imagem_total = request.files['imagem_total']
@@ -119,8 +137,67 @@ def post_output():
         'numero_tarifaconvencional': numero_tarifaconvencional,
         'equipamento_path': equipamento_path,
         'total_path': total_path,
-        'mensagem_maritaka':mensagem_maritaka
+        'mensagem_maritaka': mensagem_maritaka
     }), 200
+
+@app.route('/login', methods=['POST'])
+def login_usuario():
+    data = request.get_json()
+    nome = data.get('nome')
+    senha = data.get('senha')
+
+    if not nome or not senha:
+        return jsonify({'error': 'Nome e senha são obrigatórios'}), 400
+    
+    conn = db_connection()
+    cursor = conn.cursor()
+
+    # Chama o procedimento armazenado
+    cursor.callproc('LoginUsuario', [nome, senha, 0])
+    p_result = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    if p_result[0][0] == 1:
+        return jsonify({'message': 'Login bem-sucedido'}), 200
+    else:
+        return jsonify({'error': 'Usuário ou senha incorretos'}), 401
+
+@app.route('/equipamentos', methods=['GET'])
+def get_equipamentos():
+    usuario_id = request.args.get('usuario_id', type=int)
+
+    if not usuario_id:
+        return jsonify({'error': 'ID do usuário é obrigatório'}), 400
+
+    conn = db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.callproc('GetEquipamentosByUsuario', [usuario_id])
+    
+    equipamentos = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'equipamento': f'{equipamentos}'}), 404
+
+# 3. Endpoint para GetHorariosByEquipamentoUsuario
+@app.route('/horarios', methods=['GET'])
+def get_horarios():
+    equipamento_usuario_id = request.args.get('equipamento_usuario_id', type=int)
+
+    if not equipamento_usuario_id:
+        return jsonify({'error': 'ID do equipamento do usuário é obrigatório'}), 400
+    conn = db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.callproc('GetHorariosByEquipamentoUsuario', [equipamento_usuario_id])
+    
+    cursor.callproc('GetEquipamentosByUsuario', [equipamento_usuario_id])
+    
+    horarios = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'horarios': horarios}), 200
 
 if __name__ == '__main__':
     app.run(port=8080)

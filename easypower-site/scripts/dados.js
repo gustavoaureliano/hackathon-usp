@@ -23,24 +23,30 @@ fetch( 'http://localhost:8080/api/output', options )
 		console.log("response")
 		console.log(response);
 		let content = `
+			<h1>Relatório de consumo diário</h1>
 			<div class="comparar">
-				<div>
-					Com a tarifa branca: R$ ${response.numero_tarifabranca}
-				</div>
-				<div class="images">
-					Com a tarifa comum: R$ ${response.numero_tarifaconvencional}
-				</div>
+				<p>
+					Com a tarifa branca: ${response.numero_tarifabranca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+					-> Mensalmente ${(response.numero_tarifabranca*30).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+				</p>
+				<p >
+					Com a tarifa comum: ${response.numero_tarifaconvencional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+					-> Mensalmente ${(response.numero_tarifaconvencional*30).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+				</p>
 			</div>
-			<div>
-				<img style='display:block; width:100px;height:100px;' id='base64image' src='data:image/jpeg;base64, ${total_imagem}'/>
-				<img style='display:block; width:100px;height:100px;' id='base64image' src='data:image/jpeg;base64, ${response.total_imagem}'/>
+			<div class="images">
+				<img id='base64image' src='data:image/jpeg;base64, ${response.equipamento_imagem}'/>
+				<img id='base64image' src='data:image/jpeg;base64, ${response.total_imagem}'/>
 			</div>
 			<div class="ai">
-				<p>chatgptmethod</p>
+				<p>${
+					response.mensagem_maritaka.substring()
+				}</p>
 			</div>
 		`
+		console.log(content)
 		let parent = document.querySelector(".container-all");
-		parent.innerHTML += content;
+		parent.innerHTML = content;
 		
 		// Do something with response.
 	} );

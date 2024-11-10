@@ -48,21 +48,25 @@ CREATE PROCEDURE AddEquipamento(
     IN p_nome_fabricante VARCHAR(255),
     IN p_potencia DECIMAL(6, 2),
     IN p_eh_input_do_usuario BOOL,
-    IN p_rigidez_de_horario TINYINT
+    IN p_rigidez_de_horario TINYINT,
+    OUT p_equipamento_id BIGINT UNSIGNED
 )
 BEGIN
     INSERT INTO EQUIPAMENTOS (nome_equipamento, nome_fabricante, potencia, eh_input_do_usuario, rigidez_de_horario)
     VALUES (p_nome_equipamento, p_nome_fabricante, p_potencia, p_eh_input_do_usuario, p_rigidez_de_horario);
+    SET p_equipamento_id = LAST_INSERT_ID();
 END //
 
 CREATE PROCEDURE AddUsuario(
     IN p_nome VARCHAR(255),
     IN p_email VARCHAR(255),
-    IN p_senha VARCHAR(255)
+    IN p_senha VARCHAR(255),
+    OUT p_usuario_id BIGINT UNSIGNED
 )
 BEGIN
     INSERT INTO USUARIOS (nome, email, senha)
     VALUES (p_nome, p_email, p_senha);
+    SET p_usuario_id = LAST_INSERT_ID();
 END //
 
 CREATE PROCEDURE AddHorarioDeUso(

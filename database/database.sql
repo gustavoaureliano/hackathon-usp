@@ -33,8 +33,8 @@ EQUIPAMENTO_USUARIO (
 CREATE TABLE IF NOT EXISTS 
 HORARIOS_DE_USO (
     horario_de_uso_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
-    inicio TIME, 
-    fim TIME, 
+    inicio VARCHAR(255), 
+    fim VARCHAR(255), 
     equipamento_usuario_id BIGINT UNSIGNED NOT NULL, 
     FOREIGN KEY (equipamento_usuario_id) REFERENCES EQUIPAMENTO_USUARIO(equipamento_usuario_id) ON DELETE CASCADE
 );
@@ -42,7 +42,6 @@ HORARIOS_DE_USO (
 
 
 DELIMITER //
-
 CREATE PROCEDURE AddEquipamento(
     IN p_nome_equipamento VARCHAR(255),
     IN p_nome_fabricante VARCHAR(255),
@@ -56,7 +55,6 @@ BEGIN
     VALUES (p_nome_equipamento, p_nome_fabricante, p_potencia, p_eh_input_do_usuario, p_rigidez_de_horario);
     SET p_equipamento_id = LAST_INSERT_ID();
 END //
-
 DELIMITER;
 
 DELIMITER //
@@ -75,8 +73,8 @@ DELIMITER;
 
 DELIMITER //
 CREATE PROCEDURE AddHorarioDeUso(
-    IN p_inicio TIME,
-    IN p_fim TIME,
+    IN p_inicio VARCHAR(255),
+    IN p_fim VARCHAR(255),
     IN p_equipamento_usuario_id BIGINT UNSIGNED
 )
 BEGIN

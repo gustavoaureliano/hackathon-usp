@@ -1,4 +1,4 @@
-.container {
+.container-all {
 	display: flex;
 	max-width: 1200px;
 	width: 90%;
@@ -14,3 +14,20 @@
 .container img {
 	width: 600px
 }
+
+.images {
+	display: flex;
+	box-sizing: border-box;
+	padding: 15px;
+	margin: 10px auto;
+	flex-direction: row
+}
+
+.ai {
+	display: flex;
+	box-sizing: border-box;
+	padding: 15px;
+	margin: 10px auto;
+	flex-direction: row
+}
+

@@ -1,6 +1,7 @@
 import mariadb
 import flask
 from flask import request, jsonify
+from flask_cors import CORS
 from datetime import timedelta
 import total
 import equipamento
@@ -9,12 +10,12 @@ import algorithm,maritalk,tarifabranca
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
-
+CORS(app)
 config = {
     'host': '127.0.0.1',
     'user': 'leodiasdc',
     'password': 'senha123',
-    'database': 'database_1'
+    'database': 'database_2'
 }
 
 def db_connection():
@@ -71,20 +72,18 @@ def add_equipamento_usuario():
 def add_usuario():
     data = request.get_json()
     conn = db_connection()
-    cur= conn.cursor()
+    cursor= conn.cursor()
     nome = data.get('nome')
     email = data.get('email')
     senha = data.get('senha')
-    cur.callproc('AddUsuario', [
-        nome,
-        email,
-        senha,
-        0
-    ])
-    usuario_id = cur.fetchall()[0][0]
-    cur.close()
+    cursor.callproc('AddUsuario', [nome, email, senha, 0])
+
+    p_usuario_id = cursor.fetchall()[0][0]
+    cursor.close()
     conn.close()
-    return jsonify({f"{usuario_id }": True})
+
+    # Retornando a resposta com o ID do novo usuário
+    return jsonify({"usuario_id": p_usuario_id}), 201
 
 @app.route('/api/horario_de_uso', methods=['POST'])
 def add_horario_de_uso():
@@ -134,7 +133,7 @@ def remove_horario_de_uso():
     conn.close()
     return jsonify({"success": True})
 
-@app.route('/api/output', methods = ['GET'])
+@app.route('/api/output', methods = ['POST'])
 def post_output():
     data = request.get_json()
     usuario_id = data.get('usuario_id')
@@ -194,16 +193,15 @@ def login_usuario():
 
     # Chama o procedimento armazenado
     cursor.callproc('LoginUsuario', [nome, senha, 0])
-    p_result = cursor.fetchall()
+    p_result = cursor.fetchall()[0][0]
 
     cursor.close()
     conn.close()
-    if p_result[0][0] == 1:
-        return jsonify({'message': 'Login bem-sucedido'}), 200
-    else:
-        return jsonify({'error': 'Usuário ou senha incorretos'}), 401
-
-@app.route('/equipamentos', methods=['GET'])
+    try:
+        return jsonify({'message': f'{p_result}'}), 200
+    except:
+        return jsonify({'message':'Usuário ou senha incorretos!'})
+@app.route('/equipamentos', methods=['POST'])
 def get_equipamentos():
     data = request.get_json()
     usuario_id = data.get('usuario_id')

@@ -1,6 +1,7 @@
 .list-equip {
 	display: flex;
-	flex: 1
+	flex: 1;
+	flex-wrap: wrap;
 }
 
 .container-equip {

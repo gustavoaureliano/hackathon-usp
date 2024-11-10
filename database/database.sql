@@ -139,17 +139,20 @@ CREATE PROCEDURE LoginUsuario(
     OUT p_result INT
 )
 BEGIN
-    DECLARE usuario_count INT;
+    DECLARE temp_id BIGINT UNSIGNED;
 
-    SELECT COUNT(*)
-    INTO usuario_count
+  
+    SELECT usuario_id
+    INTO temp_id
     FROM USUARIOS
-    WHERE nome = p_nome AND senha = p_senha;
+    WHERE nome = p_nome AND senha = p_senha
+    LIMIT 1;
 
-    IF usuario_count = 1 THEN
-        SET p_result = 1;
+ 
+    IF temp_id IS NOT NULL THEN
+        SET p_result = temp_id;  
     ELSE
-        SET p_result = 0;
+        SET p_result = 0;       
     END IF;
 END //
 

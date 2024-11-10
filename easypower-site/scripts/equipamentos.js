@@ -23,33 +23,39 @@ for (let i = 0; i < 5; i++) {
 	equipamentos.push(obj)
 }
 
-const options = {
-	method: 'GET',
+let user_id = window.localStorage.getItem("id-user");
+console.log("user_id")
+console.log(user_id)
+
+const params = {
+	"usuario_id": user_id,
 };
 
-fetch( 'http://localhost:3000', options )
+const options = {
+	method: "POST",
+	headers: {
+		"Content-Type": "application/json"  // Tells the server you're sending JSON
+	},
+	body: JSON.stringify(params) 
+};
+console.log(params)
+
+
+fetch( 'http://localhost:8080/equipamentos', options )
 	.then( response => response.json() )
 	.then( response => {
-		let gotlist = [
-			{
-					"nome": "equip",
-					"consumo": 10
-			},
-			{
-					"nome": "equip",
-					"consumo": 12
-			}
-		]
-
-		console.log(gotlist);
-		let parent = document.querySelector(".list-equip")
+		console.log("response")
+		console.log(response);
+		let correctedString = response.equipamento.replace(/'/g, '"');
+		let obs = JSON.parse(correctedString);
+		let parent = document.querySelector(".list-equip");
 
 		for(let i = 0; i < 5; i++) {
 			let template = `<div class="equipamento">
-						<p class="name">${gotlist[i].nome} ${gotlist[i].consumo}w </p>
+						<p class="name">${obs[i].nome_equipamento} ${obs[i].potencia}W </p>
 					</div>`
 
-			parent.innerHTML += template
+			parent.innerHTML += template;
 		}
 		
 		// Do something with response.

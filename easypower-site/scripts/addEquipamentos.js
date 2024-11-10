@@ -16,31 +16,41 @@ let templatePerido = `
 let btnAddPeriodo = document.querySelector("#btnAddPeriodos");
 let btnAddEquip = document.querySelector("#btnAddEquip");
 
-let nome = document.querySelector("#nome").value
-let fabricante = document.querySelector("#fabricante").value
-let potencia = document.querySelector("#potencia").value
-
 let user_id = window.localStorage.getItem("id-user");
 
+let objteste;
+
 btnAddEquip.addEventListener("click", () => {
+	
+	let nome = document.querySelector("#nome").value
+	let fabricante = document.querySelector("#fabricante").value
+	let potencia = document.querySelector("#potencia").value
+
 	const params = {
 		"usuario_id": user_id, 
 		"nome_equipamento": nome,
 		"nome_fabricante": fabricante,
 		"potencia": potencia,
 		"rigidez_de_horario": 1,
-		"periodos": listPeriodos
+		"periodos": listPeriodos,
+		"eh_input_do_usuario": 1
+	};
+	
+	const options = {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"  // Tells the server you're sending JSON
+		},
+		body: JSON.stringify(params) 
 	};
 	console.log(params)
-	const options = {
-		method: 'POST',
-		body: JSON.stringify( params )  
-	};
-	fetch( 'http://localhost:3000', options )
+	
+	objteste = params;
+	
+	fetch( 'http://localhost:8080/api/equipamento', options )
 		.then( response => response.json() )
 		.then( response => {
 			console.log(response);
-			window.localStorage.setItem('id-user', response.id);
 			window.location.replace("/equipamentos.html");
 			//window.location.replace("/");
 		} );

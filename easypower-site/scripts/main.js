@@ -19,10 +19,10 @@ function updateOption() {
 	`
 	let parentDiv = document.querySelector("#buttons")
 	id_user = window.localStorage.getItem('id-user');
-	if (id_user) {
-		parentDiv.innerHTML = btnEquipamentos 
-	} else {
+	if (id_user === undefined || id_user === null) {
 		parentDiv.innerHTML = btnLogin + btnCadastro 
+	} else {
+		parentDiv.innerHTML = btnEquipamentos  	
 	}
 	console.log("id-user is:");
 	console.log(id_user);

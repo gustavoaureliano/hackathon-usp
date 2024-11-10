@@ -11,10 +11,15 @@ btn.addEventListener("click", () => {
 		"senha": senhaImput 
 	};
 	const options = {
-		method: 'POST',
-		body: JSON.stringify( params )  
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"  // Tells the server you're sending JSON
+		},
+		body: JSON.stringify(params) 
 	};
-	fetch( 'http://localhost:3000', options )
+	console.log(params)
+	
+	fetch( 'http://localhost:8080/api/usuario', options )
 		.then( response => response.json() )
 		.then( response => {
 			console.log(response);

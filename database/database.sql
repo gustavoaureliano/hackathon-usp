@@ -120,32 +120,28 @@ END //
 
 DELIMITER ;
 
-
 DELIMITER //
+
 CREATE PROCEDURE LoginUsuario(
     IN p_nome VARCHAR(255),
     IN p_senha VARCHAR(255),
-    OUT p_result INT
+    OUT p_result BIGINT UNSIGNED
 )
 BEGIN
-    DECLARE usuario_count INT;
-
-    SELECT COUNT(*)
-    INTO usuario_count
+    DECLARE temp_id BIGINT UNSIGNED;
+    SELECT usuario_id
+    INTO temp_id
     FROM USUARIOS
-    WHERE nome = p_nome AND senha = p_senha;
-
-    IF usuario_count = 1 THEN
-        SET p_result = 1;
+    WHERE nome = p_nome AND senha = p_senha
+    LIMIT 1;
+    IF temp_id IS NOT NULL THEN
+        SET p_result = temp_id;  
     ELSE
-        SET p_result = 0;
+        SET p_result = 0;        
     END IF;
 END //
 
-DELIMITER ; 
-
-DELIMITER //
-
+DELIMITER ;
 
 DELIMITER //
 

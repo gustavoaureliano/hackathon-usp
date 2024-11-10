@@ -8,9 +8,9 @@ app.config["DEBUG"] = True
 
 config = {
     'host': '127.0.0.1',
-    'user': 'app_user',
-    'password': 'Password123!',
-    'database': 'todo'
+    'user': 'artur',
+    'password': 'senha123',
+    'database': 'DATABASE_2'
 }
 
 def db_connection():

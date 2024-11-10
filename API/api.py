@@ -2,6 +2,13 @@ import mariadb
 import flask
 from flask import request, jsonify
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'algorithms')))
+import total
+from total import grafico_total
+import equipamento
+from equipamento import grafico_equipamento
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -122,9 +129,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def post_output():
     imagem_equipamento = request.files['imagem_equipamento']
     imagem_total = request.files['imagem_total']
-
-    equipamento_path = os.path.join(app.config['UPLOAD_FOLDER'], 'imagem_equipamento.png')
-    total_path = os.path.join(app.config['UPLOAD_FOLDER'], 'imagem_total.png')
+    total.grafico_total(dados)
+    total.grafico_equipamento(dados)
+    equipamento_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
+    total_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
 
     imagem_equipamento.save(equipamento_path)
     imagem_total.save(total_path)
@@ -180,24 +188,36 @@ def get_equipamentos():
     
     return jsonify({'equipamento': f'{equipamentos}'}), 404
 
-# 3. Endpoint para GetHorariosByEquipamentoUsuario
-@app.route('/horarios', methods=['GET'])
-def get_horarios():
-    equipamento_usuario_id = request.args.get('equipamento_usuario_id', type=int)
+@app.route('/equipamentos/equipamentosbyusuario', methods=['GET'])
+def get_equipamentos_by_usuario(usuario_id):
+    conn = db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.callproc('GetEquipamentosByUsuario', [usuario_id])
+    
+    # Recuperar os resultados da procedure
+    equipamentos = []
+    for row in cursor:
+        equipamentos.append(row)
+    
+    cursor.close()
+    conn.close()
+    return jsonify(equipamentos), 200
 
-    if not equipamento_usuario_id:
-        return jsonify({'error': 'ID do equipamento do usuário é obrigatório'}), 400
+
+@app.route('/horarios/horariosbyequipamentousuario', methods=['GET'])
+def get_horarios_by_equipamento_usuario(equipamento_usuario_id):
     conn = db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.callproc('GetHorariosByEquipamentoUsuario', [equipamento_usuario_id])
     
-    cursor.callproc('GetEquipamentosByUsuario', [equipamento_usuario_id])
+    # Recuperar os resultados da procedure
+    horarios = []
+    for row in cursor:
+        horarios.append(row)
     
-    horarios = cursor.fetchall()
     cursor.close()
     conn.close()
-
-    return jsonify({'horarios': horarios}), 200
+    return jsonify(horarios), 200
 
 if __name__ == '__main__':
     app.run(port=8080)

@@ -129,8 +129,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def post_output():
     imagem_equipamento = request.files['imagem_equipamento']
     imagem_total = request.files['imagem_total']
-    total.grafico_total(dados)
-    total.grafico_equipamento(dados)
+
     equipamento_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
     total_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
 
@@ -139,6 +138,12 @@ def post_output():
     numero_tarifabranca = float(request.get['numero_tarifabranca'])
     numero_tarifaconvencional = float(request.get['numero_tarifaconvencional'])
     mensagem_maritaka = request.get['mensagem_maritaka']
+
+    conn = db_connection()
+    cursor = conn.cursor()
+
+    total.grafico_total(dados)
+    total.grafico_equipamento(dados)
     return jsonify({
         'message': 'Arquivos e variáveis recebidos com sucesso!',
         'numero_tarifabranca': numero_tarifabranca,
@@ -154,9 +159,6 @@ def login_usuario():
     nome = data.get('nome')
     senha = data.get('senha')
 
-    if not nome or not senha:
-        return jsonify({'error': 'Nome e senha são obrigatórios'}), 400
-    
     conn = db_connection()
     cursor = conn.cursor()
 
@@ -187,21 +189,6 @@ def get_equipamentos():
     conn.close()
     
     return jsonify({'equipamento': f'{equipamentos}'}), 404
-
-@app.route('/equipamentos/equipamentosbyusuario', methods=['GET'])
-def get_equipamentos_by_usuario(usuario_id):
-    conn = db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.callproc('GetEquipamentosByUsuario', [usuario_id])
-    
-    # Recuperar os resultados da procedure
-    equipamentos = []
-    for row in cursor:
-        equipamentos.append(row)
-    
-    cursor.close()
-    conn.close()
-    return jsonify(equipamentos), 200
 
 
 @app.route('/horarios/horariosbyequipamentousuario', methods=['GET'])

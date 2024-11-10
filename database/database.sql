@@ -57,6 +57,9 @@ BEGIN
     SET p_equipamento_id = LAST_INSERT_ID();
 END //
 
+DELIMITER;
+
+DELIMITER //
 CREATE PROCEDURE AddUsuario(
     IN p_nome VARCHAR(255),
     IN p_email VARCHAR(255),
@@ -68,7 +71,9 @@ BEGIN
     VALUES (p_nome, p_email, p_senha);
     SET p_usuario_id = LAST_INSERT_ID();
 END //
+DELIMITER;
 
+DELIMITER //
 CREATE PROCEDURE AddHorarioDeUso(
     IN p_inicio TIME,
     IN p_fim TIME,
@@ -78,7 +83,9 @@ BEGIN
     INSERT INTO HORARIOS_DE_USO (inicio, fim, equipamento_usuario_id)
     VALUES (p_inicio, p_fim, p_equipamento_usuario_id);
 END //
+DELIMITER;
 
+DELIMITER //
 CREATE PROCEDURE AddEquipamentoUsuario(
     IN p_equipamento_id BIGINT UNSIGNED,
     IN p_usuario_id BIGINT UNSIGNED,

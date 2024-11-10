@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS
 USUARIOS (
     usuario_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
     nome VARCHAR(255) NOT NULL, 
-    email VARCHAR(255), 
+    email VARCHAR(255) NOT NULL, 
     senha VARCHAR(255) NOT NULL
 );
 
@@ -120,28 +120,32 @@ END //
 
 DELIMITER ;
 
-DELIMITER //
 
+DELIMITER //
 CREATE PROCEDURE LoginUsuario(
     IN p_nome VARCHAR(255),
     IN p_senha VARCHAR(255),
-    OUT p_result BIGINT UNSIGNED
+    OUT p_result INT
 )
 BEGIN
-    DECLARE temp_id BIGINT UNSIGNED;
-    SELECT usuario_id
-    INTO temp_id
+    DECLARE usuario_count INT;
+
+    SELECT COUNT(*)
+    INTO usuario_count
     FROM USUARIOS
-    WHERE nome = p_nome AND senha = p_senha
-    LIMIT 1;
-    IF temp_id IS NOT NULL THEN
-        SET p_result = temp_id;  
+    WHERE nome = p_nome AND senha = p_senha;
+
+    IF usuario_count = 1 THEN
+        SET p_result = 1;
     ELSE
-        SET p_result = 0;        
+        SET p_result = 0;
     END IF;
 END //
 
-DELIMITER ;
+DELIMITER ; 
+
+DELIMITER //
+
 
 DELIMITER //
 
@@ -157,6 +161,31 @@ END //
 
 DELIMITER ;
 
+
+DELIMITER //
+
+CREATE PROCEDURE GetEquipamentosEHorariosByUsuario(
+    IN p_usuario_id BIGINT UNSIGNED
+)
+BEGIN
+    SELECT 
+        e.equipamento_id,
+        e.nome_equipamento,
+        e.nome_fabricante,
+        e.potencia,
+        h.inicio AS horario_inicio,
+        h.fim AS horario_fim
+    FROM 
+        EQUIPAMENTOS e
+    JOIN 
+        EQUIPAMENTO_USUARIO eu ON e.equipamento_id = eu.equipamento_id
+    JOIN 
+        HORARIOS_DE_USO h ON eu.equipamento_usuario_id = h.equipamento_usuario_id
+    WHERE 
+        eu.usuario_id = p_usuario_id;
+END //
+
+DELIMITER ;
 
 DELIMITER //
 

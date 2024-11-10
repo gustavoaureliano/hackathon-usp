@@ -1,14 +1,11 @@
 import mariadb
 import flask
 from flask import request, jsonify
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'algorithms')))
+from datetime import timedelta
 import total
-from total import grafico_total
 import equipamento
-from equipamento import grafico_equipamento
+import base64
+import algorithm,maritalk,tarifabranca
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -17,7 +14,7 @@ config = {
     'host': '127.0.0.1',
     'user': 'leodiasdc',
     'password': 'senha123',
-    'database': 'database_0'
+    'database': 'database_1'
 }
 
 def db_connection():
@@ -29,13 +26,24 @@ def add_equipamento():
     conn = db_connection()
     cur = conn.cursor()
     data = request.json
+    usuario_id = data['usuario_id']
     cur.callproc('AddEquipamento', [
         data['nome_equipamento'],
         data.get('nome_fabricante'),
         data['potencia'],
         data['eh_input_do_usuario'],
-        data['rigidez_de_horario']
+        data['rigidez_de_horario'],
+        0
     ])
+    equipamento_id = cur.fetchall()[0][0]
+    for periodo in data['periodos']:
+        cur.callproc('AddEquipamentoUsuario', [equipamento_id, usuario_id, 0])
+        equipamentousuarioid = cur.fetchall()[0][0]
+        cur.callproc('AddHorarioDeUso', [
+            periodo['inicio'],
+            periodo['fim'],
+            equipamentousuarioid]
+        )
     conn.commit()
     cur.close()
     conn.close()
@@ -61,18 +69,22 @@ def add_equipamento_usuario():
 
 @app.route('/api/usuario', methods=['POST'])
 def add_usuario():
+    data = request.get_json()
     conn = db_connection()
-    cur = conn.cursor()
-    data = request.json
+    cur= conn.cursor()
+    nome = data.get('nome')
+    email = data.get('email')
+    senha = data.get('senha')
     cur.callproc('AddUsuario', [
-        data['nome'],
-        data['email'],
-        data['senha']
+        nome,
+        email,
+        senha,
+        0
     ])
-    conn.commit()
+    usuario_id = cur.fetchall()[0][0]
     cur.close()
     conn.close()
-    return jsonify({"success": True})
+    return jsonify({f"{usuario_id }": True})
 
 @app.route('/api/horario_de_uso', methods=['POST'])
 def add_horario_de_uso():
@@ -122,34 +134,52 @@ def remove_horario_de_uso():
     conn.close()
     return jsonify({"success": True})
 
-UPLOAD_FOLDER = '/api/output'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-@app.route('/api/output', methods = ['POST'])
+@app.route('/api/output', methods = ['GET'])
 def post_output():
-    imagem_equipamento = request.files['imagem_equipamento']
-    imagem_total = request.files['imagem_total']
-
-    equipamento_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
-    total_path = os.path.join(app.config['UPLOAD_FOLDER'], '../algorithms/grafico_equipamento.png')
-
-    imagem_equipamento.save(equipamento_path)
-    imagem_total.save(total_path)
-    numero_tarifabranca = float(request.get['numero_tarifabranca'])
-    numero_tarifaconvencional = float(request.get['numero_tarifaconvencional'])
-    mensagem_maritaka = request.get['mensagem_maritaka']
+    data = request.get_json()
+    usuario_id = data.get('usuario_id')
 
     conn = db_connection()
     cursor = conn.cursor()
+    cursor.callproc('GetEquipamentosEHorariosByUsuario', [usuario_id])
 
-    total.grafico_total(dados)
-    total.grafico_equipamento(dados)
+    dados_tratados = []
+    dados = []
+    for row in cursor:
+        dados.append(row)
+    print(dados)
+    for dado in dados:
+        dict = {
+            "equipamento":dado[1],
+            "potencia":float(dado[3]),
+            "comeco":dado[4],
+            "fim":dado[5]
+        }
+        dados_tratados.append(dict)
+    total.grafico_total(dados_tratados)
+    equipamento.grafico_equipamento(dados_tratados)
+
+    caminho_total = "grafico_total.png"
+    caminho_equipamento = "grafico_equipamento.png"
+
+    with open(caminho_total, "rb") as imagem_file:
+        total_base64 = base64.b64encode(imagem_file.read()).decode('utf-8')
+    
+    with open(caminho_equipamento, "rb") as imagem_file:
+        equipamento_base64 = base64.b64encode(imagem_file.read()).decode('utf-8')
+
+
+    numero_tarifabranca = algorithm.total_tarifabranca(dados_tratados)
+    numero_tarifaconvencional = algorithm.total_tarifaconvencional(dados_tratados)
+
+    mensagem_maritaka =  maritalk.message(dados_tratados)
+
     return jsonify({
         'message': 'Arquivos e variáveis recebidos com sucesso!',
         'numero_tarifabranca': numero_tarifabranca,
         'numero_tarifaconvencional': numero_tarifaconvencional,
-        'equipamento_path': equipamento_path,
-        'total_path': total_path,
+        'equipamento_imagem': total_base64,
+        'total_imagem': equipamento_base64,
         'mensagem_maritaka': mensagem_maritaka
     }), 200
 
@@ -175,7 +205,8 @@ def login_usuario():
 
 @app.route('/equipamentos', methods=['GET'])
 def get_equipamentos():
-    usuario_id = request.args.get('usuario_id', type=int)
+    data = request.get_json()
+    usuario_id = data.get('usuario_id')
 
     if not usuario_id:
         return jsonify({'error': 'ID do usuário é obrigatório'}), 400
@@ -205,6 +236,24 @@ def get_horarios_by_equipamento_usuario(equipamento_usuario_id):
     cursor.close()
     conn.close()
     return jsonify(horarios), 200
+
+@app.route('/horarios/infos', methods = ['GET'])
+def get_equipamentos_e_horarios_by_usuario():
+    conn = db_connection()
+    cursor = conn.cursor(dictionary=True)
+    data = request.get_json()
+    usuario_id = data.get('usuario_id')
+
+    cursor.callproc('GetEquipamentosEHorariosByUsuario', [usuario_id])
+    
+    # Recuperar os resultados da procedure
+    equipamentos_e_horarios = []
+    for row in cursor:
+        equipamentos_e_horarios.append(row)
+    
+    cursor.close()
+    conn.close()
+    return jsonify(equipamentos_e_horarios), 200
 
 if __name__ == '__main__':
     app.run(port=8080)

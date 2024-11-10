@@ -59,5 +59,5 @@ def grafico_total(dados):
     plt.title('Consumo de Energia ao Longo do Dia')
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig('grafico_consumo.png')
+    plt.savefig('grafico_total.png')
     

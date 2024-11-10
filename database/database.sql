@@ -8,7 +8,7 @@ EQUIPAMENTOS (
     equipamento_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
     nome_equipamento VARCHAR(255) NOT NULL, 
     nome_fabricante VARCHAR(255),
-    potencia DECIMAL(6, 2) NOT NULL,  
+    potencia VARCHAR(255) NOT NULL,  
     eh_input_do_usuario BOOL, 
     rigidez_de_horario TINYINT
 );
@@ -45,7 +45,7 @@ DELIMITER //
 CREATE PROCEDURE AddEquipamento(
     IN p_nome_equipamento VARCHAR(255),
     IN p_nome_fabricante VARCHAR(255),
-    IN p_potencia DECIMAL(6, 2),
+    IN p_potencia VARCHAR(255),
     IN p_eh_input_do_usuario BOOL,
     IN p_rigidez_de_horario TINYINT,
     OUT p_equipamento_id BIGINT UNSIGNED

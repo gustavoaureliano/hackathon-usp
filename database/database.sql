@@ -81,11 +81,13 @@ END //
 
 CREATE PROCEDURE AddEquipamentoUsuario(
     IN p_equipamento_id BIGINT UNSIGNED,
-    IN p_usuario_id BIGINT UNSIGNED
+    IN p_usuario_id BIGINT UNSIGNED,
+    OUT p_EquipamentoUsuario_id BIGINT UNSIGNED
 )
 BEGIN
     INSERT INTO EQUIPAMENTO_USUARIO (equipamento_id, usuario_id)
     VALUES (p_equipamento_id, p_usuario_id);
+    SET p_EquipamentoUsuario_id = LAST_INSERT_ID();
 END //
 
 DELIMITER ;

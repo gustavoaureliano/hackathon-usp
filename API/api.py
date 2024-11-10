@@ -1,6 +1,7 @@
 import mariadb
 import flask
 from flask import request, jsonify
+import os
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -95,6 +96,31 @@ def remove_horario_de_uso():
     cur.close()
     conn.close()
     return jsonify({"success": True})
+
+UPLOAD_FOLDER = '/api/output'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/api/output', methods = 'POST')
+def post_output():
+    imagem_equipamento = request.files['imagem_equipamento']
+    imagem_total = request.files['imagem_total']
+
+    equipamento_path = os.path.join(app.config['UPLOAD_FOLDER'], 'imagem_equipamento.png')
+    total_path = os.path.join(app.config['UPLOAD_FOLDER'], 'imagem_total.png')
+
+    imagem_equipamento.save(equipamento_path)
+    imagem_total.save(total_path)
+    numero_tarifabranca = float(request.get['numero_tarifabranca'])
+    numero_tarifaconvencional = float(request.get['numero_tarifaconvencional'])
+    mensagem_maritaka = request.get['mensagem_maritaka']
+    return jsonify({
+        'message': 'Arquivos e variáveis recebidos com sucesso!',
+        'numero_tarifabranca': numero_tarifabranca,
+        'numero_tarifaconvencional': numero_tarifaconvencional,
+        'equipamento_path': equipamento_path,
+        'total_path': total_path,
+        'mensagem_maritaka':mensagem_maritaka
+    }), 200
 
 if __name__ == '__main__':
     app.run(port=8080)

@@ -27,4 +27,4 @@ response = client.chat.completions.create(
 )
 answer = response.choices[0].message.content
 
-print(f"Resposta: {answer}")   # Deve imprimir algo como "25 + 27 é igual a 52."
+print(f"Resposta: {answer}")

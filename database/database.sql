@@ -143,3 +143,39 @@ BEGIN
 END //
 
 DELIMITER ; 
+
+DELIMITER //
+
+
+DELIMITER //
+
+CREATE PROCEDURE GetEquipamentosByUsuario(
+    IN p_usuario_id BIGINT UNSIGNED
+)
+BEGIN
+    SELECT e.equipamento_id, e.nome_equipamento, e.nome_fabricante, e.potencia
+    FROM EQUIPAMENTOS e
+    JOIN EQUIPAMENTO_USUARIO eu ON e.equipamento_id = eu.equipamento_id
+    WHERE eu.usuario_id = p_usuario_id;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE PROCEDURE GetHorariosByEquipamentoUsuario(
+    IN p_equipamento_usuario_id BIGINT UNSIGNED
+)
+BEGIN
+    SELECT 
+        horario_de_uso_id,
+        inicio AS horario_inicio,
+        fim AS horario_fim
+    FROM 
+        HORARIOS_DE_USO
+    WHERE 
+        equipamento_usuario_id = p_equipamento_usuario_id;
+END //
+
+DELIMITER ;
